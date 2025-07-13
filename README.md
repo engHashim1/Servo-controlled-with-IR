@@ -29,6 +29,13 @@ Servo Motor	Arduino
 VCC (Red)	5V
 GND (Brown)	GND
 SIG (Yellow)	D9 (PWM)
+
+
+Schematic 
+
+<img width="970" height="747" alt="Schematic" src="https://github.com/user-attachments/assets/bc836846-37af-44aa-8895-d05d7ef398a1" />
+
+
 💻 Code Setup
 
     Install the IRremote library
