@@ -1,108 +1,157 @@
-# Servo-controlled-with-IR
-Control a servo motor with an IR remote using Arduino. Press buttons 1-9 to move the servo to preset angles (0°-180°). Includes HEX code mapping and easy wiring.
+**Two Ways to Control Servos: IR Remote (Digital) vs. Joystick (Analog)**  
+
+This ReadME contains **two distinct Arduino projects** for servo motor control, demonstrating both digital and analog input methods. Choose either project or combine them for advanced applications!  
+
+---
+
+## **📂 Project 1: IR Remote Servo Controller**  
+**Control servos with button presses from an IR remote (Digital Signal Project)**  
+
+### **Features**  
+- Use buttons **1-9** to set servo angles (0° to 180°)  
+- HEX code decoding for any NEC IR remote  
+- Serial monitor debugging  
+
+### **Components**  
+- Arduino Uno  
+- IR Receiver (TSOP382)  
+- Servo Motor (SG90)  
+
+### **Wiring**  
+| IR Receiver | Arduino |  
+|------------|---------|  
+| VCC        | 5V      |  
+| GND        | GND     |  
+| OUT        | D11     |  
+
+| Servo      | Arduino |  
+|------------|---------|  
+| Signal     | D9      |  
+| VCC        | 5V      |  
+| GND        | GND     |  
+
+Schematic
+<img width="970" height="747" alt="Schematic" src="https://github.com/user-attachments/assets/5d26b5ef-7253-43f0-b5cd-8030680784e4" />
 
 
-📌 Features
 
-    ✅ Remote-controlled servo using IR signals
+### **Code Highlights**  
+```cpp
+#include <IRremote.h>
+#include <Servo.h>
 
-    🔢 Buttons 1-9 map to angles (0°, 20°, 40°, ..., 180°)
+void setup() {
+  IrReceiver.begin(11); // IR on D11
+  myServo.attach(9);    // Servo on D9
+}
 
-    🔍 Serial Monitor debugging (shows HEX codes & servo angles)
+void loop() {
+  if (IrReceiver.decode()) {
+    uint32_t code = IrReceiver.decodedIRData.decodedRawData;
+    if (code == 0xF30CFF00) myServo.write(0); // Button 1 → 0°
+    IrReceiver.resume();
+  }
+}
+```
 
-    🛠️ Easy wiring (only 3 components needed)
+---
 
-    🔄 Customizable (supports any NEC IR remote)
+## **📂 Project 2: Analog Joystick Servo Controller**  
+**Precisely control servos with a 2-axis joystick (Analog Signal Project)**  
 
-🛠 Hardware Needed
-Component	Quantity
-Arduino (Uno/Nano)	1
-IR Receiver (TSOP382/VS1838)	1
-Servo Motor (SG90)	1
-Breadboard & Jumper Wires	As needed
-🔌 Wiring Diagram
-IR Receiver	Arduino
-VCC	5V
-GND	GND
-OUT	D11
-Servo Motor	Arduino
-VCC (Red)	5V
-GND (Brown)	GND
-SIG (Yellow)	D9 (PWM)
+### **Features**  
+- Smooth 180° servo movement via potentiometer inputs  
+- X/Y axis independent control  
+- Built-in deadzone for stability  
 
+### **Components**  
+- Arduino Uno  
+- Analog Joystick (KY-023)  
+- 2x Servo Motors (SG90)  
 
-Schematic 
+### **Wiring**  
+| Joystick | Arduino |  
+|----------|---------|  
+| VCC      | 5V      |  
+| GND      | GND     |  
+| VRX      | A0      |  
+| VRY      | A1      |  
 
-<img width="970" height="747" alt="Schematic" src="https://github.com/user-attachments/assets/bc836846-37af-44aa-8895-d05d7ef398a1" />
+| Servo X   | Arduino |  
+|-----------|---------|  
+| Signal    | D9      |  
+| VCC       | 5V      |  
+| GND       | GND     |  
 
-
-💻 Code Setup
-
-    Install the IRremote library
-
-        Arduino IDE → Sketch → Include Library → Manage Libraries → Search for "IRremote" by shirriff → Install.
-
-    Upload the code
-
-    CODE
-
-    #include <IRremote.h>
-    #include <Servo.h>
-
-    #define IR_PIN 11  // IR receiver on D11
-    Servo myServo;
-
-    void setup() {
-      Serial.begin(9600);
-      IrReceiver.begin(IR_PIN);
-      myServo.attach(9);  // Servo on D9
-    }
-
-    void loop() {
-      if (IrReceiver.decode()) {
-        uint32_t irCode = IrReceiver.decodedIRData.decodedRawData;
-        
-        // Button-to-angle mapping (customize your HEX codes)
-        if (irCode == 0xF30CFF00) myServo.write(0);     // Button 1 → 0°
-        else if (irCode == 0xE718FF00) myServo.write(20); // Button 2 → 20°
-        // ... Add more buttons (up to 9 → 180°)
-        
-        IrReceiver.resume();  // Ready for next signal
-      }
-      delay(100);
-    }
-
-    Find your remote's HEX codes
-
-        Use the IRrecvDumpV2 example (File > Examples > IRremote > IRrecvDumpV2) to detect button codes.
-
-🚀 How It Works
-
-    Press a button (e.g., "1") on the IR remote.
-
-    The IR receiver captures the signal and sends it to Arduino.
-
-    Arduino decodes the HEX value and moves the servo to the assigned angle.
-
-    The Serial Monitor shows real-time feedback.
-
-🔧 Troubleshooting
-Issue	Solution
-Servo doesn’t move	Check wiring + remote batteries
-Wrong angles	Update HEX codes in the if-else
-Jittery servo	Add a 100µF capacitor to servo
+| Servo Y   | Arduino |  
+|-----------|---------|  
+| Signal    | D10     |  
+| VCC       | 5V      |  
+| GND       | GND     |  
 
 
-🎯 Extensions
+Circuit Diagram in WOKWI
+<img width="924" height="633" alt="لقطة شاشة 2025-07-14 042657" src="https://github.com/user-attachments/assets/671b7d06-1975-4faf-a5b3-0904f5f69aee" />
 
-    Add more servos (e.g., pan-tilt mechanism).
 
-    Use an LCD screen to display the angle.
+### **Code Highlights**  
+```cpp
+#include <Servo.h>
+Servo xServo, yServo;
 
-    Combine with a distance sensor for object tracking.
+void setup() {
+  xServo.attach(9);  // X-axis on D9
+  yServo.attach(10); // Y-axis on D10
+}
 
-📜 License
+void loop() {
+  int xAngle = map(analogRead(A0), 0, 1023, 0, 180);
+  xServo.write(xAngle); // X-axis control
+}
+```
 
-MIT License - Free for personal and educational use.
+---
 
-Happy tinkering! 🛠️🚀
+## **📚 Key Differences**  
+| Feature          | IR Remote Project (Digital) | Joystick Project (Analog) |  
+|-----------------|----------------------------|--------------------------|  
+| **Signal Type** | Digital (HEX codes)         | Analog (0-1023 values)   |  
+| **Precision**  | Fixed positions             | Continuous movement      |  
+| **Best For**   | Preset actions              | Real-time control        |  
+| **Complexity** | Easy (button mapping)       | Moderate (calibration)   |  
+
+---
+
+## **⚡ Quick Start**  
+1. **For IR Control**:  
+   - Upload `IR_Servo.ino`  
+   - Press buttons 1-9 to test  
+
+2. **For Joystick Control**:  
+   - Upload `Joystick_Servo.ino`  
+   - Move joystick to see servo response  
+
+---
+
+## **🚀 Upgrade Ideas**  
+- **Combine Both**: Use joystick for manual control + IR buttons for presets  
+- **Add LCD**: Display current angle/mode  
+- **Wireless**: Replace joystick with Bluetooth module  
+
+---
+
+## **⚠️ Troubleshooting**  
+| Issue               | IR Solution               | Joystick Solution         |  
+|---------------------|--------------------------|--------------------------|  
+| No response         | Check remote batteries    | Test potentiometers with multimeter |  
+| Servo jitter       | Add 100µF capacitor      | Implement software deadzone |  
+| Wrong movements    | Verify HEX codes          | Calibrate `map()` ranges |  
+
+---
+
+**🎓 Learning Outcomes**:  
+- Digital vs. analog signal processing  
+- Servo motor control techniques  
+- Real-world input device integration  
+
+Choose your preferred method or experiment with both! Let us know which project you're building. 🛠️
